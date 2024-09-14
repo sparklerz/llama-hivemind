@@ -3,7 +3,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 from transformers.trainer import Trainer
-from hivemind import CollaborativeOptimizer
+from hivemind import Optimizer
 from hivemind.optim import HivemindGradScaler
 from hivemind.utils.logging import get_logger, use_hivemind_log_handler
 
@@ -18,7 +18,7 @@ class CollaborativeHFTrainer(Trainer):
     Used to ensure that peers don't process batches in the same order.
     """
 
-    def __init__(self, *, data_seed: int, collaborative_optimizer: CollaborativeOptimizer, **kwargs):
+    def __init__(self, *, data_seed: int, optimizer: Optimizer, **kwargs):
         self.data_seed = data_seed
         self.collaborative_optimizer = collaborative_optimizer
         super().__init__(optimizers=(collaborative_optimizer, NoOpScheduler(collaborative_optimizer)), **kwargs)
@@ -39,7 +39,7 @@ class CollaborativeHFTrainer(Trainer):
 
 
 class NoOpScheduler(LRSchedulerBase):
-    """Dummy scheduler for transformers.Trainer. The real scheduler is defined in CollaborativeOptimizer.scheduler"""
+    """Dummy scheduler for transformers.Trainer. The real scheduler is defined in Optimizer.scheduler"""
 
     def get_lr(self):
         return [group['lr'] for group in self.optimizer.param_groups]
