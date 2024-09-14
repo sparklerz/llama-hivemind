@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple
 from multiaddr import Multiaddr
 from pydantic import BaseModel, StrictFloat, confloat, conint
 
-from hivemind import choose_ip_address
+from hivemind.utils import networking
 from hivemind.dht.crypto import RSASignatureValidator
 from hivemind.dht.schema import BytesWithPublicKey, SchemaValidator
 from hivemind.dht.validation import RecordValidatorBase
@@ -43,7 +43,7 @@ def log_visible_maddrs(visible_maddrs: List[Multiaddr], only_p2p: bool) -> None:
     else:
         available_ips = [Multiaddr(addr) for addr in visible_maddrs if "ip4" in addr or "ip6" in addr]
         if available_ips:
-            preferred_ip = choose_ip_address(available_ips)
+            preferred_ip = networking.choose_ip_address(available_ips)
             selected_maddrs = [addr for addr in visible_maddrs if preferred_ip in str(addr)]
         else:
             selected_maddrs = visible_maddrs
