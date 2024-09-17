@@ -35,29 +35,29 @@ def call_with_retries(func, n_retries=10, initial_delay=1.0):
             time.sleep(delay)
 
 
-class InvalidCredentialsError(NonRetriableError):
-    pass
+# class InvalidCredentialsError(NonRetriableError):
+#     pass
 
 
-class NotInAllowlistError(NonRetriableError):
-    pass
+# class NotInAllowlistError(NonRetriableError):
+#     pass
 
 
 class HuggingFaceAuthorizer(TokenAuthorizerBase):
-    _AUTH_SERVER_URL = 'https://collaborative-training-auth.huggingface.co'
+    # _AUTH_SERVER_URL = 'https://collaborative-training-auth.huggingface.co'
 
     def __init__(self, organization_name: str, model_name: str, hf_user_access_token: str):
         super().__init__()
 
         self.organization_name = organization_name
         self.model_name = model_name
-        self.hf_user_access_token = hf_user_access_token
+        # self.hf_user_access_token = hf_user_access_token
 
-        self._authority_public_key = None
-        self.coordinator_ip = None
-        self.coordinator_port = None
+        # self._authority_public_key = None
+        # self.coordinator_ip = None
+        # self.coordinator_port = None
 
-        self._hf_api = HfApi()
+        # self._hf_api = HfApi()
 
     async def get_token(self) -> AccessToken:
         """
@@ -76,46 +76,53 @@ class HuggingFaceAuthorizer(TokenAuthorizerBase):
 
     def _join_experiment(self) -> None:
         try:
-            url = f'{self._AUTH_SERVER_URL}/api/experiments/join'
-            headers = {'Authorization': f'Bearer {self.hf_user_access_token}'}
-            response = requests.put(
-                url,
-                headers=headers,
-                params={
-                    'organization_name': self.organization_name,
-                    'model_name': self.model_name,
-                },
-                json={
-                    'experiment_join_input': {
-                        'peer_public_key': self.local_public_key.to_bytes().decode(),
-                    },
-                },
-            )
+            # url = f'{self._AUTH_SERVER_URL}/api/experiments/join'
+            # headers = {'Authorization': f'Bearer {self.hf_user_access_token}'}
+            # response = requests.put(
+            #     url,
+            #     headers=headers,
+            #     params={
+            #         'organization_name': self.organization_name,
+            #         'model_name': self.model_name,
+            #     },
+            #     json={
+            #         'experiment_join_input': {
+            #             'peer_public_key': self.local_public_key.to_bytes().decode(),
+            #         },
+            #     },
+            # )
 
-            response.raise_for_status()
-            response = response.json()
+            # response.raise_for_status()
+            # response = response.json()
 
-            self._authority_public_key = RSAPublicKey.from_bytes(response['auth_server_public_key'].encode())
-            self.coordinator_ip = response['coordinator_ip']
-            self.coordinator_port = response['coordinator_port']
+            # self._authority_public_key = RSAPublicKey.from_bytes(response['auth_server_public_key'].encode())
+            # self.coordinator_ip = response['coordinator_ip']
+            # self.coordinator_port = response['coordinator_port']
 
-            token_dict = response['hivemind_access']
+            # token_dict = response['hivemind_access']
+
+            username = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+
             access_token = AccessToken()
             access_token.username = token_dict['username']
-            access_token.public_key = token_dict['peer_public_key'].encode()
-            access_token.expiration_time = str(datetime.fromisoformat(token_dict['expiration_time']))
-            access_token.signature = token_dict['signature'].encode()
+            access_token.public_key = self.local_public_key.to_bytes()
+            # access_token.public_key = token_dict['peer_public_key'].encode()
+            access_token.expiration_time = str(datetime.utcnow() + timedelta(days=1))
+            # access_token.expiration_time = str(datetime.fromisoformat(token_dict['expiration_time']))
+            access_token.signature = self.local_private_key.sign(self._token_to_bytes(access_token))
+            # access_token.signature = token_dict['signature'].encode()
             self._local_access_token = access_token
             logger.info(f'Access for user {access_token.username} '
                         f'has been granted until {access_token.expiration_time} UTC')
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 401:  # Unauthorized
-                raise NotInAllowlistError()
-            raise
+        # except requests.exceptions.HTTPError as e:
+        #     if e.response.status_code == 401:  # Unauthorized
+        #         raise NotInAllowlistError()
+        #     raise
 
     def is_token_valid(self, access_token: AccessToken) -> bool:
         data = self._token_to_bytes(access_token)
-        if not self._authority_public_key.verify(data, access_token.signature):
+        # if not self._authority_public_key.verify(data, access_token.signature):
+        if not RSAPublicKey.from_bytes(access_token.public_key).verify(data, access_token.signature):
             logger.exception('Access token has invalid signature')
             return False
 
@@ -155,39 +162,45 @@ def authorize_with_huggingface() -> HuggingFaceAuthorizer:
         if model_name is None:
             model_name = input('HuggingFace model name: ')
 
-        hf_user_access_token = os.getenv('HF_USER_ACCESS_TOKEN')
-        if hf_user_access_token is None:
-            print(
-                "\nCopy a token from 🤗 Hugging Face settings page at "
-                f"{colored('https://huggingface.co/settings/token', attrs=['bold'])} "
-                "and paste it here.\n\n"
-                f"💡 {colored('Tip:', attrs=['bold'])} "
-                "If you don't already have one, you can create a dedicated user access token.\n"
-                f"Go to {colored('https://huggingface.co/settings/token', attrs=['bold'])}, "
-                f"click the {colored('New token', attrs=['bold'])} button, "
-                f"and choose the {colored('read', attrs=['bold'])} role.\n"
-            )
-            hf_user_access_token = getpass('🤗 Hugging Face user access token (characters will be hidden): ')
+        # hf_user_access_token = os.getenv('HF_USER_ACCESS_TOKEN')
+        # if hf_user_access_token is None:
+        #     print(
+        #         "\nCopy a token from 🤗 Hugging Face settings page at "
+        #         f"{colored('https://huggingface.co/settings/token', attrs=['bold'])} "
+        #         "and paste it here.\n\n"
+        #         f"💡 {colored('Tip:', attrs=['bold'])} "
+        #         "If you don't already have one, you can create a dedicated user access token.\n"
+        #         f"Go to {colored('https://huggingface.co/settings/token', attrs=['bold'])}, "
+        #         f"click the {colored('New token', attrs=['bold'])} button, "
+        #         f"and choose the {colored('read', attrs=['bold'])} role.\n"
+        #     )
+        #     hf_user_access_token = getpass('🤗 Hugging Face user access token (characters will be hidden): ')
 
-        authorizer = HuggingFaceAuthorizer(organization_name, model_name, hf_user_access_token)
+        # authorizer = HuggingFaceAuthorizer(organization_name, model_name, hf_user_access_token)
 
-        try:
-            authorizer.join_experiment()
-            print(f"🚀 You will contribute to the collaborative training under the username {authorizer.username}")
-            return authorizer
-        except InvalidCredentialsError:
-            print('Invalid user access token, please try again')
-        except NotInAllowlistError:
-            print(
-                '\n😥 Authentication has failed.\n\n'
-                'This error may be due to the fact:\n'
-                "    1. Your user access token is not valid. You can try to delete the previous token and "
-                "recreate one. Be careful, organization tokens can't be used to join a collaborative "
-                "training.\n"
-                f"    2. You have not yet joined the {organization_name} organization. You can request to "
-                "join this organization by clicking on the 'request to join this org' button at "
-                f"https://huggingface.co/{organization_name}.\n"
-                f"    3. The {organization_name} organization doesn't exist at https://huggingface.co/{organization_name}.\n"
-                f"    4. No {organization_name}'s admin has created a collaborative training for the {organization_name} "
-                f"organization and the {model_name} model."
-            )
+        authorizer = HuggingFaceAuthorizer(organization_name, model_name)
+
+        authorizer.join_experiment()
+        print(f"🚀 You will contribute to the collaborative training under the username {authorizer.username}")
+        return authorizer
+
+        # try:
+        #     authorizer.join_experiment()
+        #     print(f"🚀 You will contribute to the collaborative training under the username {authorizer.username}")
+        #     return authorizer
+        # except InvalidCredentialsError:
+        #     print('Invalid user access token, please try again')
+        # except NotInAllowlistError:
+        #     print(
+        #         '\n😥 Authentication has failed.\n\n'
+        #         'This error may be due to the fact:\n'
+        #         "    1. Your user access token is not valid. You can try to delete the previous token and "
+        #         "recreate one. Be careful, organization tokens can't be used to join a collaborative "
+        #         "training.\n"
+        #         f"    2. You have not yet joined the {organization_name} organization. You can request to "
+        #         "join this organization by clicking on the 'request to join this org' button at "
+        #         f"https://huggingface.co/{organization_name}.\n"
+        #         f"    3. The {organization_name} organization doesn't exist at https://huggingface.co/{organization_name}.\n"
+        #         f"    4. No {organization_name}'s admin has created a collaborative training for the {organization_name} "
+        #         f"organization and the {model_name} model."
+        #     )
