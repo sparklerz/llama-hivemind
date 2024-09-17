@@ -107,7 +107,8 @@ class HuggingFaceAuthorizer(TokenAuthorizerBase):
         username = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
 
         access_token = AccessToken()
-        access_token.username = token_dict['username']
+        # access_token.username = token_dict['username']
+        access_token.username = username
         access_token.public_key = self.local_public_key.to_bytes()
         # access_token.public_key = token_dict['peer_public_key'].encode()
         access_token.expiration_time = str(datetime.utcnow() + timedelta(days=1))
