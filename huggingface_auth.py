@@ -75,7 +75,7 @@ class HuggingFaceAuthorizer(TokenAuthorizerBase):
         call_with_retries(self._join_experiment)
 
     def _join_experiment(self) -> None:
-        try:
+        # try:
             # url = f'{self._AUTH_SERVER_URL}/api/experiments/join'
             # headers = {'Authorization': f'Bearer {self.hf_user_access_token}'}
             # response = requests.put(
@@ -101,19 +101,19 @@ class HuggingFaceAuthorizer(TokenAuthorizerBase):
 
             # token_dict = response['hivemind_access']
 
-            username = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
+        username = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
 
-            access_token = AccessToken()
-            access_token.username = token_dict['username']
-            access_token.public_key = self.local_public_key.to_bytes()
-            # access_token.public_key = token_dict['peer_public_key'].encode()
-            access_token.expiration_time = str(datetime.utcnow() + timedelta(days=1))
-            # access_token.expiration_time = str(datetime.fromisoformat(token_dict['expiration_time']))
-            access_token.signature = self.local_private_key.sign(self._token_to_bytes(access_token))
-            # access_token.signature = token_dict['signature'].encode()
-            self._local_access_token = access_token
-            logger.info(f'Access for user {access_token.username} '
-                        f'has been granted until {access_token.expiration_time} UTC')
+        access_token = AccessToken()
+        access_token.username = token_dict['username']
+        access_token.public_key = self.local_public_key.to_bytes()
+        # access_token.public_key = token_dict['peer_public_key'].encode()
+        access_token.expiration_time = str(datetime.utcnow() + timedelta(days=1))
+        # access_token.expiration_time = str(datetime.fromisoformat(token_dict['expiration_time']))
+        access_token.signature = self.local_private_key.sign(self._token_to_bytes(access_token))
+        # access_token.signature = token_dict['signature'].encode()
+        self._local_access_token = access_token
+        logger.info(f'Access for user {access_token.username} '
+                    f'has been granted until {access_token.expiration_time} UTC')
         # except requests.exceptions.HTTPError as e:
         #     if e.response.status_code == 401:  # Unauthorized
         #         raise NotInAllowlistError()
@@ -121,6 +121,7 @@ class HuggingFaceAuthorizer(TokenAuthorizerBase):
 
     def is_token_valid(self, access_token: AccessToken) -> bool:
         data = self._token_to_bytes(access_token)
+        # if not self._authority_public_key.verify(data, access_token.signature):
         if not RSAPublicKey.from_bytes(access_token.public_key).verify(data, access_token.signature):
             logger.exception('Access token has invalid signature')
             return False
