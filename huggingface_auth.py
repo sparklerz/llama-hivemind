@@ -61,6 +61,8 @@ class HuggingFaceAuthorizer(TokenAuthorizerBase):
         # self.coordinator_port = None
 
         # self._hf_api = HfApi()
+        self.local_private_key = RSAPrivateKey()
+        self.local_public_key = self.local_private_key.get_public_key()
 
     async def get_token(self) -> AccessToken:
         """
