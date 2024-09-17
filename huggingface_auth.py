@@ -162,23 +162,21 @@ def authorize_with_huggingface() -> HuggingFaceAuthorizer:
         if model_name is None:
             model_name = input('HuggingFace model name: ')
 
-        # hf_user_access_token = os.getenv('HF_USER_ACCESS_TOKEN')
-        # if hf_user_access_token is None:
-        #     print(
-        #         "\nCopy a token from 🤗 Hugging Face settings page at "
-        #         f"{colored('https://huggingface.co/settings/token', attrs=['bold'])} "
-        #         "and paste it here.\n\n"
-        #         f"💡 {colored('Tip:', attrs=['bold'])} "
-        #         "If you don't already have one, you can create a dedicated user access token.\n"
-        #         f"Go to {colored('https://huggingface.co/settings/token', attrs=['bold'])}, "
-        #         f"click the {colored('New token', attrs=['bold'])} button, "
-        #         f"and choose the {colored('read', attrs=['bold'])} role.\n"
-        #     )
-        #     hf_user_access_token = getpass('🤗 Hugging Face user access token (characters will be hidden): ')
+        hf_user_access_token = os.getenv('HF_USER_ACCESS_TOKEN')
+        if hf_user_access_token is None:
+            print(
+                "\nCopy a token from 🤗 Hugging Face settings page at "
+                f"{colored('https://huggingface.co/settings/token', attrs=['bold'])} "
+                "and paste it here.\n\n"
+                f"💡 {colored('Tip:', attrs=['bold'])} "
+                "If you don't already have one, you can create a dedicated user access token.\n"
+                f"Go to {colored('https://huggingface.co/settings/token', attrs=['bold'])}, "
+                f"click the {colored('New token', attrs=['bold'])} button, "
+                f"and choose the {colored('read', attrs=['bold'])} role.\n"
+            )
+            hf_user_access_token = getpass('🤗 Hugging Face user access token (characters will be hidden): ')
 
-        # authorizer = HuggingFaceAuthorizer(organization_name, model_name, hf_user_access_token)
-
-        authorizer = HuggingFaceAuthorizer(organization_name, model_name)
+        authorizer = HuggingFaceAuthorizer(organization_name, model_name, hf_user_access_token)
 
         authorizer.join_experiment()
         print(f"🚀 You will contribute to the collaborative training under the username {authorizer.username}")
