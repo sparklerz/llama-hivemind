@@ -3,6 +3,9 @@ import time
 from datetime import datetime, timedelta
 from getpass import getpass
 
+import random
+import string
+
 import requests
 from huggingface_hub import HfApi
 from termcolor import colored
