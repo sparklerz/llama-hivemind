@@ -62,7 +62,6 @@ class HuggingFaceAuthorizer(TokenAuthorizerBase):
 
         # self._hf_api = HfApi()
         self.local_private_key = RSAPrivateKey()
-        self.local_public_key = self.local_private_key.get_public_key()
 
     async def get_token(self) -> AccessToken:
         """
@@ -111,7 +110,7 @@ class HuggingFaceAuthorizer(TokenAuthorizerBase):
         access_token = AccessToken()
         # access_token.username = token_dict['username']
         access_token.username = username
-        access_token.public_key = self.local_public_key.to_bytes()
+        access_token.public_key = self.local_private_key.public_key().to_bytes()
         # access_token.public_key = token_dict['peer_public_key'].encode()
         access_token.expiration_time = str(datetime.utcnow() + timedelta(days=1))
         # access_token.expiration_time = str(datetime.fromisoformat(token_dict['expiration_time']))
