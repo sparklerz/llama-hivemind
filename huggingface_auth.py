@@ -12,7 +12,7 @@ from termcolor import colored
 
 from hivemind.proto.auth_pb2 import AccessToken
 from hivemind.utils.auth import TokenAuthorizerBase
-from hivemind.utils.crypto import RSAPublicKey
+from hivemind.utils.crypto import RSAPrivateKey, RSAPublicKey
 from hivemind.utils.logging import get_logger
 
 
