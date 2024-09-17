@@ -121,7 +121,6 @@ class HuggingFaceAuthorizer(TokenAuthorizerBase):
 
     def is_token_valid(self, access_token: AccessToken) -> bool:
         data = self._token_to_bytes(access_token)
-        # if not self._authority_public_key.verify(data, access_token.signature):
         if not RSAPublicKey.from_bytes(access_token.public_key).verify(data, access_token.signature):
             logger.exception('Access token has invalid signature')
             return False
