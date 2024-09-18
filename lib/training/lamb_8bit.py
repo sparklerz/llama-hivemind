@@ -179,10 +179,10 @@ class CPULAMB8Bit(Optimizer2State):
         elif p_cpu.numel() <= chunk_size:
             # quantized tensor within chunk size
             exp_avg = dequantize_blockwise(
-                state['state1'], QuantState(absmax=state['absmax1'], code=state['qmap1']), blocksize=block_size
+                state['state1'], QuantState(absmax=state['absmax1'], code=state['qmap1'], blocksize=block_size)
             )
             exp_avg_sq = dequantize_blockwise(
-                state['state2'], QuantState(absmax=state['absmax2'], code=state['qmap2']), blocksize=block_size
+                state['state2'], QuantState(absmax=state['absmax2'], code=state['qmap2'], blocksize=block_size)
             )
 
             exp_avg.mul_(beta1).add_(grad_cpu, alpha=1 - beta1)
@@ -219,10 +219,10 @@ class CPULAMB8Bit(Optimizer2State):
                     )  # clone chunks to ensure that tensors do not have offsets
 
                 exp_avg_chunk = dequantize_blockwise(
-                    chunk_state1, QuantState(absmax=chunk_absmax1, code=state['qmap1']), blocksize=block_size
+                    chunk_state1, QuantState(absmax=chunk_absmax1, code=state['qmap1'], blocksize=block_size)
                 )
                 exp_avg_sq_chunk = dequantize_blockwise(
-                    chunk_state2, QuantState(absmax=chunk_absmax2, code=state['qmap2']), blocksize=block_size
+                    chunk_state2, QuantState(absmax=chunk_absmax2, code=state['qmap2'], blocksize=block_size)
                 )
 
                 exp_avg_chunk.mul_(beta1).add_(chunk_grad, alpha=1 - beta1)
